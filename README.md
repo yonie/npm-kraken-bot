@@ -25,6 +25,8 @@ To use;
 3. npm -i
 4. nodejs server.js (or npm start)
 
+Note that the bot is set to use EUR currency. 
+
 ## License
 
 Licensed under GPL-3.0.

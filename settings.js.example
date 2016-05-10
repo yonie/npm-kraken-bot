@@ -1,0 +1,4 @@
+// set kraken API keys
+exports.krakenkey = 'yourkey';
+exports.krakenpasscode = 'yourpasscode';
+

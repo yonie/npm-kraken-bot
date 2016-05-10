@@ -2,9 +2,9 @@
   "name": "npm-kraken-bot",
   "version": "0.1.0",
   "description": "simple cryptocurrency trader bot for kraken",
-  "keywords": ["kraken", "cryptocurrency", "bitcoin", "bot"];
+  "keywords": ["kraken", "cryptocurrency", "bitcoin", "bot"],
   "license": "GPL-3.0",
-  "files": ["server.js", "settings.js.example"];
+  "files": ["server.js", "settings.js.example"],
   "dependencies": {
     "kraken-api": ">=0.1.7"
   },

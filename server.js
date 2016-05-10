@@ -4,7 +4,7 @@ var KrakenClient = require('kraken-api');
 var kraken = new KrakenClient(settings.krakenkey,settings.krakenpasscode);
 
 // determine the minimum asset amount to trade (this prevents API errors)
-var minTrade = 0.025;
+var minTrade = 0.01;
 
 // tolerance determines how much % near hi or low the lasttrade needs to be to begin acting
 // NOTE: should NOT be set above 49% for obvious reasons

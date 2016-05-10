@@ -20,7 +20,7 @@ if (process.argv.length > 2) {
 // add EUR to make the trade pair
 var pair = asset+'ZEUR';
 
-//log("Getting ticker info...");
+// get ticker info
 kraken.api('Ticker', {"pair": pair}, function(error, data) {
 	
 	if(error) {
@@ -37,7 +37,7 @@ kraken.api('Ticker', {"pair": pair}, function(error, data) {
 		// output fancy graph
 		log(createGraph(distancefromlow, daylow, dayhi, buyTolerance, sellTolerance));
 		
-		// see if we need to continue buying/selling
+		// see if we are going to trade 
 		if (distancefromlow <= buyTolerance || distancefromhi <= sellTolerance) {
 
 			kraken.api('Balance', null, function(error, data) {
@@ -56,6 +56,8 @@ kraken.api('Ticker', {"pair": pair}, function(error, data) {
 
 						// determine the volume to buy, skip 50 cents for rounding issues
 						var volume = ((euroBalance-0.5) / lasttrade) * buyRatio;
+					
+						// we could end up with negative volume because of the 50 cents correction
 						if (volume < 0) volume = 0;
 
 						if (volume >= minTrade) {
@@ -68,7 +70,7 @@ kraken.api('Ticker', {"pair": pair}, function(error, data) {
 								}
 							});
 						} else {
-							// buy volume too low 
+							// trade volume too low 
 						}
 					} else { 
 						
@@ -91,13 +93,13 @@ kraken.api('Ticker', {"pair": pair}, function(error, data) {
 								}
 							});
 						} else {
-							// sale volume too low 
+							// trade volume too low 
 						}
 					}
 				}
 			});
 		} else {
-			// trade tolerances not met
+			// trade tolerances not met, no need to trade
 		}
 	}
 });

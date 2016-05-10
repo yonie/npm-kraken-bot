@@ -21,9 +21,9 @@ I don't want to monitor a website for market data myself, so I made a bot that d
 To use; 
 
 1. rename settings.js.example to settings.js and provide with proper keys
-2. be sure to set the proper 
-2. npm -i
-3. nodejs server.js (or npm start)
+2. be sure to set the proper default cryptocurrency and limits
+3. npm -i
+4. nodejs server.js (or npm start)
 
 ## License
 

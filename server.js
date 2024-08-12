@@ -61,7 +61,7 @@ if (
 
 // how often does the engine refresh data, in seconds
 // note anything lower than about 30 will get you into API rate limiting
-const ENGINE_TICK = 31;
+const ENGINE_TICK = 61;
 
 // minimum trade amount before trying a sell order (in eur)
 // note values lower than 10 can lead to API errors from Kraken
@@ -364,7 +364,7 @@ kraken.api("AssetPairs", null, function (error, pairdata) {
 var ticker = {};
 
 // main routine
-setInterval(getTicker, 1000 * ENGINE_TICK);
+setInterval(getTicker, 1000 * ENGINE_TICK * 1.1);
 
 function getTicker() {
   // get ticker info for all pairs
@@ -750,7 +750,7 @@ function getPrimaryNameForAsset(altname) {
 var trades = [];
 
 // get trade history info
-setInterval(getTradeHistory, 1000 * ENGINE_TICK * 2);
+setInterval(getTradeHistory, 1000 * ENGINE_TICK * 2.1);
 
 // fetch trade history in batches. this call is batched to prevent rate limiting by kraken.
 function getTradeHistory() {
@@ -792,7 +792,7 @@ var greedValueClassification = null;
 
 // update greed
 setTimeout(getGreedStatistics, 1000);
-setInterval(getGreedStatistics, 1000 * ENGINE_TICK * 2 * 5);
+setInterval(getGreedStatistics, 1000 * ENGINE_TICK * 2.2 * 5);
 
 // we are getting greed stats from an external source, which informs us if
 // we need to enter stop loss mode.
@@ -842,7 +842,7 @@ function getGreedStatistics() {
 }
 
 // get trade balance info
-setInterval(updateBalance, 1000 * ENGINE_TICK);
+setInterval(updateBalance, 1000 * ENGINE_TICK * 1.2);
 
 function updateBalance() {
   const btcValue = ticker["XXBTZEUR"]

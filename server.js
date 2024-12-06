@@ -401,16 +401,19 @@ function getTicker() {
         );
 
         if (!daylow || !dayhi || !lasttrade) {
-          console.error("Missing ticker data.", daylow, dayhi, lasttrade);
+          //console.debug("Invalid ticker data for pair:", pair);
           return;
         }
 
         // update wallet
         if (wallet[asset]) {
           wallet[asset]["price"] = parseFloat(lasttrade);
-          if (wallet[asset]["amount"]) {
-            wallet[asset]["value"] =
-              wallet[asset]["amount"] * wallet[asset]["price"];
+
+          // let's see if we have an amount in wallet
+          const amount = wallet[asset]?.amount ?? null;
+
+          if (amount) {
+            wallet[asset]["value"] = amount * wallet[asset]["price"];
 
             // add to our total observed balance
             balanceSum += wallet[asset].value;
@@ -463,20 +466,20 @@ function getTicker() {
       });
 
       // add our non-asset balance to complete the sum
-      if (wallet && wallet["ZEUR"] && wallet["ZEUR"].value)
+      if (wallet && wallet["ZEUR"] && wallet["ZEUR"].value) {
         balanceSum += wallet["ZEUR"].value;
+      }
       tradeBalance = balanceSum.toFixed(2);
     }
   );
 }
 
 function considerBuy(pair, lasttrade, asset) {
-  console.debug("Potentially interesting asset:", pair, ticker[pair]);
+  //console.debug("Potentially interesting asset:", pair, ticker[pair]);
 
-  const shareOfWallet = getShareOfWallet();
-  if (shareOfWallet == null) return;
-
-  // make sure we don't buy stuff below minimum trade volume
+  // we determine how much to buy based on how greedy people are
+  if (!greedValue) return;
+  const shareOfWallet = greedValue / 100;
   if (wallet["ZEUR"] && wallet["ZEUR"].amount < tradeBalance * shareOfWallet)
     return;
 
@@ -525,28 +528,6 @@ function considerBuy(pair, lasttrade, asset) {
     });
 }
 
-function getShareOfWallet() {
-  // adjust how much we buy based on btc price
-  let btcPrice = ticker["XXBTZEUR"]
-    ? parseFloat(ticker["XXBTZEUR"].split(" ")[0])
-    : null;
-
-  // if btc price is unknown we're not proceeding
-  if (!btcPrice) {
-    console.warn("BTC price not yet known, aborting potential trade.");
-    return;
-  }
-  if (btcPrice < 15000) return 0.19;
-  if (btcPrice < 20000) return 0.24;
-  if (btcPrice < 25000) return 0.31;
-  if (btcPrice < 30000) return 0.4;
-  if (btcPrice < 35000) return 0.52;
-  if (btcPrice < 40000) return 0.67;
-  if (btcPrice < 45000) return 0.86;
-
-  return 0.86;
-}
-
 function considerSell(move, lasttrade, pair, asset) {
   // determine the sell price based on observed movement and a magic value: ex. (10-3) * 0.61 = 4.27%
   const SELL_RATIO = 0.61;
@@ -565,13 +546,13 @@ function considerSell(move, lasttrade, pair, asset) {
   // check open orders to see if a sell order is even still possible
   const openSellOrderVolume = getSellOrderVolume(pair);
   const notYetForSale = wallet[asset]["amount"] - (openSellOrderVolume ?? 0);
-  if (notYetForSale * lasttrade > MIN_SELL_AMOUNT)
-    console.info(
-      "Found asset somehow not yet for sale:",
-      pair,
-      notYetForSale,
-      notYetForSale * lasttrade
-    );
+  //if (notYetForSale * lasttrade > MIN_SELL_AMOUNT)
+    //console.info(
+    //  "Found asset somehow not yet for sale:",
+    //  pair,
+    //  notYetForSale,
+    //  notYetForSale * lasttrade
+    //);
 
   const walletAmount = wallet[asset].amount;
 
@@ -758,12 +739,14 @@ function getTradeHistory() {
 
   // hardcoded max size in kraken api
   const sample = 50;
-  const delayms = 105;
+
+  // increase this value to prevent nonce errors
+  const delayms = 205;
 
   // how much history do we want
   const max = 50;
 
-  for (let i = 0; i < max; i += sample) {
+  for (let i = 1; i <= max; i += sample) {
     setTimeout(function () {
       kraken.api(
         "TradesHistory",
@@ -811,6 +794,7 @@ function getGreedStatistics() {
       response.on("end", () => {
         try {
           const apiResponse = JSON.parse(data);
+          let oldGreedValue = greedValue;
           greedValue = apiResponse.data[0].value;
           const previousGreedValue = apiResponse.data[1].value;
           greedValueClassification = apiResponse.data[0].value_classification;
@@ -821,15 +805,16 @@ function getGreedStatistics() {
               greedValue >= maxGreedPercentage &&
               previousGreedValue >= maxGreedPercentage;
 
-            log(
-              "Current greed index: " +
-                greedValueClassification +
-                " (" +
-                greedValue +
-                "%). " +
-                "Stop loss mode: " +
-                STOP_LOSS_MODE
-            );
+            if (!oldGreedValue || greedValue != oldGreedValue)
+              log(
+                "Current greed index: " +
+                  greedValueClassification +
+                  " (" +
+                  greedValue +
+                  "%). " +
+                  "Stop loss mode: " +
+                  STOP_LOSS_MODE
+              );
           }
         } catch (error) {
           console.error("Error parsing greed data:", error);
@@ -842,20 +827,20 @@ function getGreedStatistics() {
 }
 
 // get trade balance info
-setInterval(updateBalance, 1000 * ENGINE_TICK * 1.2);
+setInterval(updateBalance, 1000 * ENGINE_TICK * 1.2137);
 
 function updateBalance() {
   const btcValue = ticker["XXBTZEUR"]
     ? tradeBalance / parseFloat(ticker["XXBTZEUR"])
     : null;
   if (tradeBalance && btcValue) {
-    log(
-      "Trade balance: " + tradeBalance + " (" + btcValue.toFixed(3) + " btc)"
-    );
-    log(
-      "Performance score: " +
-        (Math.round(tradeBalance * btcValue * 100) / 1000).toFixed(3)
-    );
+    //log(
+    //  "Trade balance: " + tradeBalance + " (" + btcValue.toFixed(3) + " btc)"
+    //);
+    //log(
+    //  "Performance score: " +
+    //    (Math.round(tradeBalance * btcValue * 100) / 1000).toFixed(3)
+    //);
   }
 
   balanceHistory[new Date().toISOString().substring(0, 13)] = tradeBalance;
@@ -999,14 +984,24 @@ function cancelOrder(orderId) {
 
 // clean up price to deal with specifications imposed by kraken API
 function trimToPrecision(pair, priceToTrim) {
+  // special case
+  if (priceToTrim == 0) return 0;
+
   if (!pair || !priceToTrim) {
-    console.error("Invalid arguments.", pair, priceToTrim);
+    console.error(
+      "Cannot trim to precision. Invalid arguments.",
+      pair,
+      priceToTrim
+    );
     return;
   }
   var precision = pairs[pair].pair_decimals;
 
   if (precision > -1) return priceToTrim.toFixed(precision);
 
-  console.error("Unknown price format for pair.", pair);
+  console.error(
+    "Cannot trim to precision. Unknown price format for pair.",
+    pair
+  );
   return priceToTrim;
 }

@@ -14,11 +14,11 @@ I became interested in automated crypto trading, and as I don't want to monitor 
 
 * Includes a simple internal web interface for manual inspection of recent trades and orders.
 * Automatically monitors all trading pairs available on the exchange and responds to any price change on minute-by-minute basis.
-* Will only invest a smaller percentage of the wallet when prices get higher (as observed by BTC price) to reduce risk. 
+* Will only invest a smaller percentage of the wallet when greed gets higher to reduce risk. 
 * The bot has built-in logic to dump a token if it dropped more than 10x the desired sell price. 
-* Constantly monitors Bitcoin Fear & Greed index and will switch into "stop loss mode" once a certain amount of greed is observed. 
+* Constantly monitors Bitcoin Fear & Greed index and will switch into "stop loss mode" once a certain defined amount of greed is observed. 
 * Exposes basic balance data so it can be logged or graphed by external software (see crypto-stats).
-* Automatically ignores coins that are dropping too fast, to prevent buying a crashed token. 
+* Automatically ignores coins that are dropping too fast, to prevent buying a crashing token. 
 
 ## Known issues
 
@@ -28,6 +28,7 @@ I became interested in automated crypto trading, and as I don't want to monitor 
 * You might get "invalid nonce" messages (while updating trades history) if you did not do any trades on this account yet. This is an API issue.
 * If you keep seeing nonce error messages, consider enlarging the API key nonce window to 10000 ms. See https://support.kraken.com/hc/en-us/articles/360001148023-What-is-a-nonce-window-
 * Editing orders needs a change in the npm-kraken-api library, see https://github.com/nothingisdead/npm-kraken-api/pull/87
+* Mid 2024 Kraken started offering staked currencies which currently do not get fully handled by the bot. To prevent issues, disable automatic staking in your Kraken account. 
 
 ## Requirements
 
